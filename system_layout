@@ -1,0 +1,127 @@
+****************************************************************************************************
+************************************** Work Flow ***************************************************
+**************************************************************************************************** 
+To be used in producer / consumer pattern combined with repository pattern
+.NET Core MVC + Entity Framework Core + SQL Server (Docker) 
+
+1. The user is met with a login window. They then authenticate into SQL server
+
+2. Once logged in you can select an existing camera or discover a new camera
+    If viewing existing camera, there are 2 features: playback and analytics.
+    If discovering new camera, select subnet, ping subnet and apply ONVIF protocol (for now)
+    Add the results to table view.
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Modules needed:
+
+The Data Plane:
+Camera: onvif/ discovery
+        rtsp steam (main and substream)
+        possible events?
+        FFMPEG??
+        RTSP camera →  MediaMTX WebRTC gateway → Browser
+        
+        receive -> relay to another browser -> record
+              
+        
+Stream:
+          connect to cameras - stay stable
+          handles auth per camera + permissions
+          pull rtsp and server to clients      
+        
+        
+The Control Plane:
+Recorder:
+        incoming stream and write video to disk
+        create timeline/index
+        manage retention        
+
+Api Server(Controller):
+        the brains
+        store meta data, users, camera configs
+        rest endpoints for ui + admin actions
+Client
+        live view
+        talks to Api server for permissions
+        
+  
+****************************************************************************************************
+****************************************************************************************************
+****************************************************************************************************       
+Phase 1
+
+WebRTC works
+No database
+Need to test with multiple cameras
+
+Phase 2
+
+Add Camera class
+Hardcoded list in memory
+
+Phase 3
+
+Replace in-memory list with SQL
+
+Phase 4
+
+Add recording + Recording table
+
+****************************************************************************************************
+************************************** Possible project structure **********************************
+**************************************************************************************************** 
+
+VMS.sln
+├── VMS.Api/                    # ASP.NET Core Web API (the brains)
+│   ├── Controllers/
+│   │   ├── CamerasController.cs
+│   │   ├── StreamsController.cs
+│   │   └── RecordingsController.cs
+│   ├── Services/
+│   │   ├── CameraService.cs
+│   │   ├── StreamManager.cs
+│   │   ├── RecorderService.cs
+│   │   └── MediaMtxClient.cs   # talks to MediaMTX HTTP API
+│   ├── Models/
+│   │   ├── Camera.cs
+│   │   ├── Stream.cs
+│   │   └── Recording.cs
+│   └── Program.cs
+├── VMS.Onvif/                  # ONVIF discovery + device control
+│   ├── OnvifDiscovery.cs
+│   └── OnvifDevice.cs
+└── VMS.Client/                 # Blazor or React frontend
+
+
+****************************************************************************************************
+************************************** Front end  structure ****************************************
+**************************************************************************************************** 
+
+Phase 1 - Blazor
+
+Get the UI working quickly
+Prove out your features
+Everything in C#, simple and fast to build
+
+Phase 2 - React
+
+Convert your Blazor app to a proper REST API (ASP.NET Core Web API)
+Build a React frontend that calls that API
+Your database and models stay exactly the same

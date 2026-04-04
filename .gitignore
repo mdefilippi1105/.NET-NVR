@@ -1,0 +1,49 @@
+
+gitignore
+# Build output
+bin/
+obj/
+
+# Visual Studio / Rider IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# NuGet
+packages/
+*.nupkg
+
+# ASP.NET Core runtime
+appsettings.Development.json
+appsettings.Local.json
+
+# Binaries in Services/ - these are executables, not source
+Services/ffmpeg
+Services/mediamtx
+
+# MediaMTX config can contain sensitive paths/ports (optional - include if it has local-only settings)
+Services/mediamtx.yml
+
+# Any recordings or HLS output your app writes at runtime
+# (add whatever folder FFmpeg writes segments/recordings to)
+recordings/
+streams/
+hls/
+
+# Logs
+*.log
+logs/
+
+# SQLite DB (if using file-based DB locally)
+*.db
+*.db-shm
+*.db-wal
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+Key decisions specific to your project:
+

@@ -1,0 +1,41 @@
+@model VideoRecorder.Camera.Camera
+
+@{
+    ViewData["Title"] = "Edit Camera";
+}
+<div class="container mt-4" style="max-width: 600px;">
+    <h2 class="text-white">Edit Camera</h2>
+    
+    @* asp-action= "Create" tells the form to POST to /Camera/Create *@
+    <form asp-action="Create">
+        
+        @* Name field *@
+        <div class="mb-3 text-white">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control"/>
+        </div>
+        
+        @*Description Field*@
+        <div class="mb-3 text-white">
+            <label asp-for="Description" class="form-label"></label>
+            <input asp-for="Description" class="form-control" />
+        </div>
+        
+        @* RTSP URL field *@
+        <div class="mb-3 text-white">
+            <label asp-for="RtspUrl" class="form-label"></label>
+            <input asp-for="RtspUrl" class="form-control" />
+        </div>
+
+        @* Enabled checkbox *@
+        <div class="mb-3 form-check text-white">
+            <input asp-for="IsEnabled" class="form-check-input" />
+            <label asp-for="IsEnabled" class="form-check-label"></label>
+        </div>
+
+        @* Buttons *@
+        <button type="submit" class="btn btn-primary text-white">Save</button>
+        <a asp-action="Index" class="btn btn-secondary text-white">Cancel</a>
+        
+    </form>
+</div>

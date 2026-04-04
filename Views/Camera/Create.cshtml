@@ -1,0 +1,124 @@
+@* Tell this view it will receive a Camera object *@
+@model VideoRecorder.Camera.Camera
+
+<div class="container mt-4" style="max-width: 600px;">
+    <h2 class="text-white">Add Camera</h2>
+    
+    @* this is the part of the window where it should place the discovered devices *@
+    <div class="modal fade" id="arpModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Discovered Cameras</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="arpResults">
+                    Scanning...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @* asp-action= "Create" tells the form to POST to /Camera/Create *@
+    <form asp-action="Create">
+        
+        @* Name field *@
+        <div class="mb-3 text-white">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control"/>
+        </div>
+        
+        @*Description Field*@
+        <div class="mb-3 text-white">
+            <label asp-for="Description" class="form-label"></label>
+            <input asp-for="Description" class="form-control" />
+        </div>
+        
+        @* RTSP URL field *@
+        <div class="mb-3 text-white">
+            <label asp-for="RtspUrl" class="form-label"></label>
+            <input asp-for="RtspUrl" class="form-control" />
+        </div>
+
+        @* Enabled checkbox *@
+        <div class="mb-3 form-check text-white">
+            <input asp-for="IsEnabled" class="form-check-input" />
+            <label asp-for="IsEnabled" class="form-check-label"></label>
+        </div>
+
+        @* Buttons *@
+        <button 
+            type="submit" 
+            class="btn btn-lg btn-ffx text-white">Save
+        </button>
+        
+        <a
+            asp-action="Index"
+            class="btn btn-lg btn-ffx text-white">Cancel
+        </a>
+        
+        <a
+            onclick="showPing()"
+            class="btn btn-lg btn-ffx text-white">Ping
+        </a>
+        
+        <a
+            class="btn btn-lg btn-ffx text-white"
+            data-bs-toggle="modal"
+            data-bs-target="#arpModal">
+            ARP
+        </a>
+        
+
+        <script>
+            function showPing() {
+                Swal.fire({
+                    title: 'Ping',
+                    input: 'text',
+                    inputPlaceholder: '192.168.1.1',
+                    background: '#1a1a2e',
+                    color: '#ffffff',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ping'
+                }).then((result) => {
+                    // result is the data from the input field
+                    // if user hits confirm button:
+                    if (result.isConfirmed) {
+                        console.log(result.value);
+                        //return the ip to the URL. ?ip= is the value
+                        window.location.href = '/Camera/PingAddress?ip=' + result.value;
+                    }
+                })
+            }
+
+        document.getElementById('arpModal').addEventListener('shown.bs.modal',
+        
+        async function showArp () {
+            
+            const response = await fetch('/Camera/Arp/'); 
+            const devices = await response.json();
+            let html = '';
+            
+            if (devices.length === 0) {
+                html = '<p> No devices found.</p>';
+            }
+            
+            for (let i = 0; i < devices.length; i++) 
+            {
+                html += '<p>' + devices[i] + '</p>';
+            }
+            document.getElementById('arpResults').innerHTML = html;
+        });
+    </script>
+        
+        
+        
+        
+        
+        
+        
+    </form>
+</div>

@@ -1,0 +1,134 @@
+@using Microsoft.AspNetCore.Hosting.StaticWebAssets
+@*****************************************************************************************
+This is the master template for our app. Its the wrapper that holds all the shared HTML
+that appears on every page: <html>, <head>, navbar, footer
+*****************************************************************************************@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0"/>
+    <title>Video Recorder Engine</title>
+    
+    <!-- load bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    
+    <style>
+        .btn-ffx {
+            background:#1e2550; 
+            border:1px solid #330860;
+            color:#fafafa;"
+            transition: background .15s, border-color .15s, color .15s;
+        }
+        .btn-ffx:hover {
+            background: #2a3270 !important;
+            border-color: #6655cc !important;
+            color: #fff !important;
+        }
+
+
+        .table-dark {
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.07);
+            --bs-table-border-color: #2e3660;
+            color: #ccd6f6;
+            background: linear-gradient(to right, #2e2a55, #4a4080);
+        }
+
+        .table thead th {
+            font-family: 'Arial Black', serif;
+            font-size: .75rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7a88bb;
+            border-bottom: 1px solid #2e3660;
+            
+        }
+        body {
+            background-color: #10163b;
+        }
+
+        .form-control {
+            background: linear-gradient(to right, #2e2a55, #4a4080);
+            border: 1px solid #7a6fb0;
+            border-radius: 6px;
+            color: #ffffff;
+        }
+
+        .form-control:focus {
+            animation: ffx-pulse 1.5s ease-in-out infinite;
+            background: linear-gradient(to right, #3a3560, #5a4e90);
+            color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(200, 168, 64, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #9090b8;
+        }
+
+        @@keyframes ffx-pulse {
+            0%,100% { box-shadow: 0 0 0 1px rgb(42, 50, 112); }
+            50%      { box-shadow: 0 0 0 3px rgb(102, 85, 204); }
+        }
+    </style>
+    
+
+</head>
+
+<body style="background-color: #0d0f1e;">
+<!-- Top navigation bar -->
+<nav class="navbar navbar-dark bg-dark px-4" style="background-color: #0d0f1e;">
+    <a class="navbar-brand" style="background-color: #0d0f1e;" href="/Camera">📹 Video Recorder</a>
+</nav>
+
+<!-- Every page's content gets injected here -->
+@RenderBody()
+
+<!-- Load Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Load Sweet Alert JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+@*****************************************************
+* GLOBAL POP UP HANDLERS
+******************************************************@
+@if (TempData["Success"] != null)
+{
+    <script>
+        Swal.fire({
+            title: 'Success!',
+            text: '@TempData["Success"]',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 2000,
+            background: '#1a1a2e',        // dark background
+            color: '#ffffff',             // white text
+            confirmButtonColor: '#0d6efd' // bootstrap blue
+
+        })
+    </script>
+}
+@if (TempData["Error"] != null)
+{
+    <script>
+        Swal.fire({
+            title: 'Error!',
+            text: '@TempData["Error"]',
+            icon: 'error',
+            showConfirmButton: false,
+            timer: 2000,
+            background: '#1a1a2e',        // dark background
+            color: '#ffffff',             // white text
+            confirmButtonColor: '#0d6efd' // bootstrap blue
+
+        })
+    </script>
+}
+
+</body>
+
+</html>

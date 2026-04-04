@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Live View";
+}
+
+<div class="container mt-4">
+    <h2 class="text-white">Live View</h2>
+    <video id="video" controls muted playsinline src="http://localhost:8888/live/@ViewData["CameraId"]/index.m3u8" class="w-100"></video>
+</div>
+
+
+@************************************************************************
+* find the video element, then create a new HLS player instance.
+* tell HLS.js where the stream is. index.m3u8 is the playlist 
+* file mediamtx generates - a text file that says where the video chunks are.
+* listen for the event after playlist file is parsed
+* next, we wait 5 secs for ffmpeg to connect
+**************************************************************************@
+@* <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> *@
+
+<script src="~/js/hls.min.js"></script>
+
+<script>
+    
+    if (Hls.isSupported()) {
+        const video = document.getElementById("video");
+        video.removeAttribute('src');
+        
+        const hls = new Hls({
+            manifestLoadingMaxRetry: 10,
+            manifestLoadingRetryDelay: 2000,
+            manifestLoadingMaxRetryTimeout: 64000,
+        });
+        setTimeout(function() {
+            hls.loadSource('http://localhost:8888/live/@ViewData["CameraId"]/index.m3u8');
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+            
+        }, 5000);
+    }
+    
+</script>
+
+
+
+
+
+@* <script> *@
+@*     const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome'); *@
+@*     const isMpegUrl = video.canPlayType('application/vnd.apple.mpegurl') *@
+@*     const isSupported = Hls.isSupported(); *@
+@*      *@
+@*     if (isSafari || isMpegUrl || isSupported ){ *@
+@*         const video = document.getElementById('video'); *@
+@*          *@
+@*         video.muted = true; *@
+@*         setTimeout(function()  *@
+@*             {  *@
+@*             video.src = 'http://localhost:8888/live/index.m3u8'; *@
+@*             video.play().catch(function(error) { *@
+@*                 console.log(error); *@
+@*             }) *@
+@*             }, 3000); *@
+@*     } else { *@
+@* *@
+@*         var video = document.getElementById("video"); *@
+@*         var hls = new Hls({ *@
+@*             manifestLoadingMaxRetry: 10, *@
+@*             manifestLoadingRetryDelay: 2000, *@
+@*             manifestLoadingMaxRetryTimeout: 64000, *@
+@*         }); *@
+@* *@
+@*         hls.loadSource('http://localhost:8888/live/index.m3u8'); *@
+@*         hls.attachMedia(video); *@
+@*         hls.on(Hls.Events.MANIFEST_PARSED, function () { *@
+@*             video.play(); *@
+@*         }); *@
+@*     }     *@
+@* </script> *@

@@ -1,0 +1,161 @@
+@* This tells the view what type of data its receiving *@
+
+@model IEnumerable<VideoRecorder.Camera.Camera>
+
+
+
+<div class="container mt-4">
+    
+    @* page title and buttons *@
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 style="font-family: 'Arial', serif; color: #ccd6f6;">Cameras</h2>
+        
+        
+        <a asp-action="Create"
+           class="btn btn-sm btn-ffx"
+           style="background:#1e2550; 
+           border:1px solid #330860; 
+           color:#fafafa;"
+           data-toggle="tooltip" 
+           data-placement="top" 
+           title="Tooltip on top"> + Add Cam Config</a>
+        
+        <a 
+           onclick="discoverDevices()" 
+           class="btn btn-sm btn-ffx"
+           style="background:#1e2550; 
+           border:1px solid #330860; 
+           color:#fafafa;"
+           data-bs-toggle="modal"
+           data-bs-target="#discoverModal">
+            + Discover Cameras
+        </a>
+        
+    </div>
+    
+    
+    
+    @* TabLe to display all the cameras *@
+    <table class= "table table-striped table-dark table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>RTSP URL</th>
+            <th>Enabled</th>
+            <th>Live</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        
+        
+        
+        
+        <tbody>
+        @************************************************************************* 
+        loop through every camera and display in a row 
+        add a button next to each entry 
+        *************************************************************************@
+        @foreach (var camera in Model)
+        {
+            <tr>
+                <input type="hidden" name="Id" value="@camera.Id" />
+                <td>@camera.Name</td>
+                <td>@camera.Description</td>
+                <td>@camera.RtspUrl</td>
+                <td>@(camera.IsEnabled ? "Yes" : "No")</td>
+
+                <td>
+
+                    <a asp-action="OpenRtspSession"
+                       asp-route-id="@camera.Id"
+                       class="btn btn-sm btn-ffx"
+                       style="background:#1e2550; 
+                       border:1px solid #330860; 
+                       color:#fafafa;"
+                       button type="button" 
+                       data-toggle="tooltip"
+                       data-placement="top"
+                       title="View camera stream live">Live View</a>
+                </td>
+                <td>
+                    <a asp-action="EditCamera"
+                       asp-route-id="@camera.Id"
+                       class="btn btn-sm btn-ffx"
+                       style="background:#1e2550; 
+                       border:1px solid #330860; 
+                       color:#fafafa;"
+                       button type="button" 
+                       data-toggle="tooltip"
+                       data-placement="top"
+                       title="Edit device">Edit Camera</a>
+                </td>
+                <td>
+                    <a asp-action="RemoveCamera"
+                       asp-route-id="@camera.Id"
+                       class="btn btn-sm btn-ffx"
+                       style="background:#1e2550; 
+                       border:1px solid #330860; 
+                       color:#fafafa;"
+                       button type="button" 
+                       data-toggle="tooltip"
+                       data-placement="top"
+                       title="Delete device">Delete Camera</a>
+                </td>
+
+            </tr>
+        }
+        </tbody>
+    </table>
+    
+    
+    @* this is the part of the window where it should place the discovered devices *@
+    <div class="modal fade" id="discoverModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Discovered Cameras</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="discoverResults">
+                    Scanning...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @* 
+    Javascript for the modal 
+    find modal by id, listen for bootstrap shown.bs.modal event
+    make request to Discover action
+    convert response into JSON data from OnvifDiscovery
+    if not empty, loop through each device
+    *@
+    <script>
+        document.getElementById('discoverModal').addEventListener('shown.bs.modal',
+        
+        async function () {
+            
+            const response = await fetch('/Camera/UdpDiscover/'); 
+            const devices = await response.json();
+            let html = '';
+            
+            if (devices.length === 0) {
+                html = '<p> No devices found.</p>';
+            }
+            
+            for (let i = 0; i < devices.length; i++) 
+            {
+                html += '<p>' + devices[i] + '</p>';
+            }
+            document.getElementById('discoverResults').innerHTML = html;
+        });
+    </script>
+    
+   
+
+</div>
