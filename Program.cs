@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using VideoRecorder.Database;
 using VideoRecorder.Services;
 
+
+//TODO: lower buffering > over 10sec
 //TODO: when deleting camera, confirm y or n?
-//TODO: need some kind of loading state, i think liveview is popping up before the stream and crashes
+//DONE?: need some kind of loading state, i think liveview is popping up before the stream and crashes
 //TODO: Fix ping - shows success incorrectly
 //TODO:  create 4 way view
 //TODO: fix or delete Stream.ProcessChecker()

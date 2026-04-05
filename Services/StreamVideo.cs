@@ -25,7 +25,11 @@ public class StreamVideo
             Process fProcess = new Process();
             // verbose logs for seeing everything, rtsp transport over tcp, point to the rtsp address
             fProcess.StartInfo.FileName = "/Users/michaeldefilippi/RiderProjects/VideoRecorder/VideoRecorder/Services/ffmpeg";
-            fProcess.StartInfo.Arguments = $"-hide_banner -loglevel verbose -analyzeduration 10M -probesize 10M -rtsp_transport tcp -i \"{filename}\" -c:v copy -f rtsp rtsp://localhost:8554/live/{cameraId}";            
+            fProcess.StartInfo.Arguments = $"-hide_banner -loglevel verbose" +
+                                           $" -analyzeduration 10M -probesize 10M " +
+                                           $"-rtsp_transport tcp -i \"{filename}\" " +
+                                           $"-c:v copy -f rtsp " +
+                                           $"rtsp://localhost:8554/live/{cameraId}";            
             fProcess.StartInfo.RedirectStandardError = true;
             fProcess.StartInfo.UseShellExecute = false;
             
@@ -54,8 +58,9 @@ public class StreamVideo
         mediaProcess.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
         _isMtxRunning = true;
         _processCounter++;
-        mediaProcess.Start();
         mediaProcess.BeginErrorReadLine();
+        mediaProcess.Start();
+        
         return true;
     }
     // I created this to keep track of processes
