@@ -7,7 +7,7 @@ using VideoRecorder.Database;
 using VideoRecorder.Services;
 
 
-//TODO: lower buffering > over 10sec
+//DONE: lower buffering > over 10sec
 //TODO: when deleting camera, confirm y or n?
 //DONE?: need some kind of loading state, i think liveview is popping up before the stream and crashes
 //TODO: Fix ping - shows success incorrectly
@@ -19,6 +19,7 @@ using VideoRecorder.Services;
 //TODO: discovered devices: clear devices button (maybe add these to a list<>())
 //TODO: discovered devices: show mac address
 //TODO: discovered devices: highlight devices that are actually network cams
+//TODO: 
 
 
 

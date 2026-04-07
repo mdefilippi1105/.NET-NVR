@@ -2,35 +2,46 @@
 
 @model IEnumerable<VideoRecorder.Camera.Camera>
 
+<<div style="display:flex;">
+
+    <div style="width:160px; 
+        min-width:160px; 
+        background:#0d1117; 
+        border-right:1px solid #330860; 
+        padding:16px 12px; 
+        display:flex; 
+        flex-direction:column; 
+        gap:8px;">
+        
+        <p style="font-size:11px; 
+            color:#6e7a9a; 
+            text-transform:uppercase; 
+            letter-spacing:.07em;
+            padding-bottom:10px;
+            border-bottom:1px solid #1e2550;
+            margin:0;">Cameras</p>
 
 
-<div class="container mt-4">
-    
-    @* page title and buttons *@
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 style="font-family: 'Arial', serif; color: #ccd6f6;">Cameras</h2>
-        
-        
         <a asp-action="Create"
            class="btn btn-sm btn-ffx"
            style="background:#1e2550; 
            border:1px solid #330860; 
            color:#fafafa;"
-           data-toggle="tooltip" 
-           data-placement="top" 
+           data-toggle="tooltip"
+           data-placement="top"
            title="Tooltip on top"> + Add Cam Config</a>
-        
-        <a 
-           onclick="discoverDevices()" 
-           class="btn btn-sm btn-ffx"
-           style="background:#1e2550; 
+
+        <a
+            onclick="discoverDevices()"
+            class="btn btn-sm btn-ffx"
+            style="background:#1e2550; 
            border:1px solid #330860; 
            color:#fafafa;"
-           data-bs-toggle="modal"
-           data-bs-target="#discoverModal">
+            data-bs-toggle="modal"
+            data-bs-target="#discoverModal">
             + Discover Cameras
         </a>
-        
+
     </div>
     
     
