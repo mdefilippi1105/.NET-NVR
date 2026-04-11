@@ -6,6 +6,7 @@ using VideoRecorder.Camera;
 using VideoRecorder.Services;
 using VideoRecorder.Database;
 using VideoRecorder.Network;
+using VideoRecorder.Util;
 
 
 namespace VideoRecorder.Controllers;
@@ -126,11 +127,14 @@ public class CameraController : Controller
     {
         var camera = _context.Camera.Find(id);
         var stream = new StreamVideo();
-
-        if (camera != null && camera.IsEnabled)
+        var streamId = $"Stream_{camera.Id}";
+        
+        if (camera.IsEnabled)
         {
             stream.StreamDataTest(camera.RtspUrl, camera.Id);
-                
+            SharedData.ActiveStreams["Camera Stream"] = streamId;
+            SharedData.StreamCount++;
+            Console.WriteLine("Total streams: " + SharedData.ActiveStreams.Count + "Amount: " + SharedData.StreamCount + " counted");
         }
         else
         {

@@ -2,7 +2,10 @@
 
 @model IEnumerable<VideoRecorder.Camera.Camera>
 
-<<div style="display:flex;">
+
+
+@* Tool bar and corresponding buttons *@
+<div style="display:flex;">
 
     <div style="width:160px; 
         min-width:160px; 
@@ -13,7 +16,7 @@
         flex-direction:column; 
         gap:8px;">
         
-        <p style="font-size:11px; 
+        <p style="font-size:22px; 
             color:#6e7a9a; 
             text-transform:uppercase; 
             letter-spacing:.07em;
@@ -25,21 +28,31 @@
         <a asp-action="Create"
            class="btn btn-sm btn-ffx"
            style="background:#1e2550; 
-           border:1px solid #330860; 
-           color:#fafafa;"
-           data-toggle="tooltip"
-           data-placement="top"
-           title="Tooltip on top"> + Add Cam Config</a>
-
+                  border:1px solid #330860; 
+                  color:#fafafa;
+                  display:flex; 
+                  align-items:center; 
+                  gap:8px;"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Tooltip on top">
+           <i class="bi bi-plus-circle-fill fs-3"></i>
+           Add Cam Config
+        </a>
+        
         <a
             onclick="discoverDevices()"
             class="btn btn-sm btn-ffx"
             style="background:#1e2550; 
-           border:1px solid #330860; 
-           color:#fafafa;"
-            data-bs-toggle="modal"
-            data-bs-target="#discoverModal">
-            + Discover Cameras
+                   border:1px solid #330860; 
+                   color:#fafafa;
+                   display:flex; 
+                   align-items:center; 
+                   gap:8px;"
+                   data-bs-toggle="modal"
+                   data-bs-target="#discoverModal">
+            <i class="bi bi-broadcast fs-3"></i>
+            Discover Cameras
         </a>
 
     </div>
@@ -50,13 +63,13 @@
     <table class= "table table-striped table-dark table-hover">
         <thead class="table-dark">
         <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>RTSP URL</th>
-            <th>Enabled</th>
-            <th>Live</th>
-            <th>Edit</th>
-            <th>Delete</th>
+            <th style="width:150px;">Name</th>
+            <th style="width:150px;">Description</th>
+            <th style="width:150px;">RTSP URL</th>
+            <th style="width:150px;">Enabled</th>
+            <th style="width:150px;">Live</th>
+            <th style="width:150px;">Edit</th>
+            <th style="width:150px;">Delete</th>
         </tr>
         </thead>
         
@@ -159,8 +172,7 @@
                 html = '<p> No devices found.</p>';
             }
             
-            for (let i = 0; i < devices.length; i++) 
-            {
+            for (let i = 0; i < devices.length; i++) {
                 html += '<p>' + devices[i] + '</p>';
             }
             document.getElementById('discoverResults').innerHTML = html;

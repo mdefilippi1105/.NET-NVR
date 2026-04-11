@@ -17,9 +17,11 @@ using OpenCvSharp;
 // get the ffmpeg data of whatever link you add
 public class StreamVideo
 {
+    
     private int _processCounter;
     private bool _isMtxRunning;
     private bool _isFfmpegRunning;
+    
     public bool StreamDataTest(string filename, Guid cameraId)
     {
             Process fProcess = new Process();
