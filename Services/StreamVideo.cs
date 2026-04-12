@@ -65,19 +65,6 @@ public class StreamVideo
         
         return true;
     }
-    // I created this to keep track of processes
-    // Its kind of silly...will prob remove
-    public async Task ProcessChecker()
-    {
-        
-        while (_processCounter >= 1)
-        {
-            
-            Console.WriteLine($"Processes: {_processCounter} " );
-            Console.WriteLine($"Current process: {Process.GetCurrentProcess().ProcessName}");
-        }
-    }
-    
         
     // open a connection to a camera > i am using internal webcam for testing
     public void OpenCvAnalyze(string filename)

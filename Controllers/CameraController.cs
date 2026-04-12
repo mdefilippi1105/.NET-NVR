@@ -121,6 +121,8 @@ public class CameraController : Controller
     /***********************************************************************
      * Grab the rtsp url from Camera.RtspUrl table
      * Open up connection via ffmpeg -> push to media mtx
+     * Add the camera stream ID to stream dictionary
+     * if the stream id is in the dict > throw error ideally
      ************************************************************************/
     
     public IActionResult OpenRtspSession(Guid id)
@@ -129,13 +131,24 @@ public class CameraController : Controller
         var stream = new StreamVideo();
         var streamId = $"Stream_{camera.Id}";
         
+        
+        //safety check- if the camera stream already exists, throw an error
+        if (SharedData.ActiveStreams.ContainsKey(camera.Name))
+        {
+            TempData["Error"] = "Camera stream already active.";
+            return RedirectToAction(nameof(Index));
+        }
+        
         if (camera.IsEnabled)
         {
             stream.StreamDataTest(camera.RtspUrl, camera.Id);
-            SharedData.ActiveStreams["Camera Stream"] = streamId;
+            SharedData.ActiveStreams[camera.Name] = streamId;
             SharedData.StreamCount++;
-            Console.WriteLine("Total streams: " + SharedData.ActiveStreams.Count + "Amount: " + SharedData.StreamCount + " counted");
+            
+            var data = SharedData.ListStreams();
+            Console.WriteLine(data);
         }
+        
         else
         {
             TempData["Error"] = "Camera is not enabled.";

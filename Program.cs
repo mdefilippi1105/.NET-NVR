@@ -7,12 +7,13 @@ using VideoRecorder.Database;
 using VideoRecorder.Services;
 
 
+//TODO: Utilize IDisposable to clean up streams
 //DONE: lower buffering > over 10sec
 //TODO: when deleting camera, confirm y or n?
 //DONE?: need some kind of loading state, i think liveview is popping up before the stream and crashes
 //TODO: Fix ping - shows success incorrectly
 //TODO:  create 4 way view
-//TODO: fix or delete Stream.ProcessChecker()
+//DONE: fix or delete Stream.ProcessChecker()
 //DONE: create camera guid per stream 
 //TODO: make sure no 2 of the same ffmpeg process running (implement camera guid)
 //TODO: discovered devices: remove duplicates
