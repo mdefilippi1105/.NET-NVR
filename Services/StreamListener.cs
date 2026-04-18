@@ -1,8 +1,9 @@
 namespace VideoRecorder.Services;
 
+
+
 using Rtsp;
 using Rtsp.Messages;
-
 
 
 public class StreamListener
@@ -15,6 +16,7 @@ public class StreamListener
     private string? _password;
     private bool _attemptedAuth = false;
     private bool _notNull;
+    private string? _sessionId;
     
     /************************************************************
      * This is a console version that ties all of these together.
@@ -36,7 +38,7 @@ public class StreamListener
             var port = 554;
             var path = "/axis-media/media.amp";
             var s = new StreamListener();
-            s.ClientConnect(host, port, path , username, password);
+            s.ClientConnect(host!, port, path , username!, password!);
             s.StartListening();
             s.SendOptions();
             s.SendDescription();
@@ -56,9 +58,7 @@ public class StreamListener
      * this would be considered the rtsp server
      * in this case, it would be an ip cam
      **********************************************************/
-    
-    //socket to rtsp
-    public void ClientConnect(string host, int port, string path, string username, string password)
+    void ClientConnect(string host, int port, string path, string username, string password)
     {
         _username = username;
         _password = password;
@@ -79,7 +79,7 @@ public class StreamListener
      * from ClientConnect().
      *
      **********************************************************/
-    public void StartListening()
+    void StartListening()
     {
         if (_tcpSocket == null) 
             return;
@@ -96,7 +96,7 @@ public class StreamListener
      * here, we read the cameras reply and decide what to do next
      * will add more switch parameters and response codes
      **********************************************************/
-    public void OnMessageReceived(object? sender, RtspChunkEventArgs e)
+    void OnMessageReceived(object? sender, RtspChunkEventArgs e)
     {
         if (e.Message is not RtspResponse response) // make sure what we get back is an actual response
             return;
@@ -108,6 +108,7 @@ public class StreamListener
             case 401:
                 Console.WriteLine("You are not authorized to use this command");
                 HandleUnauthorize(response);
+                Console.WriteLine(response.Headers["WWW-Authenticate"]);
                 return;
             case 200:
                 HandleOk(response);
@@ -120,7 +121,7 @@ public class StreamListener
      * switch -> if OK -> Send DESCRIBE
      * if OK to DESCRIBE -> Print SDP (stream info)
      **********************************************************/
-    public void HandleOk(RtspResponse response)
+    void HandleOk(RtspResponse response)
     {
         switch (response.OriginalRequest)
         {
@@ -135,22 +136,37 @@ public class StreamListener
                 Console.WriteLine(sdp);
 
                 string? controlUrl = null;
+                
+                
+                // split each line of the text in the SDP.
+                // SDP is the wall of text we get back from cam explaining different configs
                 foreach (var line in sdp.Split('\n'))
                 {
+                    // this finds the video track URL in the SDP. The SDP has two "a=control:" lines
+                    // we need the URL that has "stream=0" at the end.
                     if (line.StartsWith("a=control:") && line.Contains("stream="))
                     {
-                        controlUrl = line.Replace("a=control:", "").Trim();
-                        break;
+                        //yank out the "a=control:" part and remove whitespace via Trim(). we need a clean URL to send below.
+                        controlUrl = line.Replace("a=control:", "").Trim(); 
+                        break; 
                     }
                 }
-
+                
+                // if when parsing the SDP we find a control URL...
                 if (response.Data.Length > 0)
                     _notNull = true;
                 
                 if (controlUrl != null)
                 {
-                    SendSetup(controlUrl);
+                    SendSetup(controlUrl); // send in here
                 }
+                break;
+            
+            case RtspRequestSetup:
+                Console.WriteLine("I got setup");
+                _sessionId = response.Headers["Session"];
+                Console.WriteLine($"Session ID: {_sessionId}");
+                SendPlay();
                 break;
         }
     }
@@ -160,7 +176,7 @@ public class StreamListener
      * Handling unauthorized events
      * 
      **********************************************************/
-    public void HandleUnauthorize(RtspResponse response)
+    void HandleUnauthorize(RtspResponse response)
     {
         if (_attemptedAuth) // this is false by default
         {
@@ -178,16 +194,42 @@ public class StreamListener
         if (retry == null)
             return;
         
-        // building a basic auth header. we need to convert user/pass
-        // into array of bytes. we then convert the string of numbers
-        // into Base64 string. this is safe for a HTTP header
-        var creds = Convert.ToBase64String(
-            System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
+        //read the WWW-Authenticate header from the 401 response
+        string? wwwAuth = response.Headers["WWW-Authenticate"];
         
-        retry.Headers["Authorization"] = $"Basic {creds}"; // add the headers
         
-        _rtspListener.SendMessage(retry); // takes care of the rest aka convert to bytes and send down the line
+        if (wwwAuth != null && wwwAuth.StartsWith("Digest"))
+        {
+            //pull out the realm and nonce values
+            string realm = ParseValue(wwwAuth, "realm");
+            string nonce = ParseValue(wwwAuth, "nonce");
+            
+            //get the rtsp method of the original request.
+            string method = response.OriginalRequest.RequestTyped.ToString().ToUpper();
+
+            //call the DigestAuth class and slap the result in the header
+            retry.Headers["Authorization"] = DigestAuth.BuildHeader(
+                _username!, _password!, realm, nonce, method, retry.RtspUri!.ToString());
+        }
+        else
+        {
+            // building a basic auth header. we need to convert user/pass
+            // into array of bytes. we then convert the string of numbers
+            // into Base64 string. this is safe for a HTTP header
+            var creds = Convert.ToBase64String(
+                System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
         
+            retry.Headers["Authorization"] = $"Basic {creds}"; // add the headers
+        }
+        _rtspListener!.SendMessage(retry); // takes care of the rest aka convert to bytes and send down the line
+    }
+
+    private string ParseValue(string header, string key)
+    {
+        string search = $"{key}=\"";
+        int start = header.IndexOf(search) + search.Length;
+        int end = header.IndexOf("\"", start);
+        return header.Substring(start, end - start);
     }
     
     
@@ -195,7 +237,7 @@ public class StreamListener
      * creates rtspOptions request object. asks camera what
      * RTSP options are supported.
      **********************************************************/
-    public void SendOptions()
+    void SendOptions()
     { 
         if (_rtspListener == null)
             return;
@@ -211,7 +253,7 @@ public class StreamListener
     /**********************************************************
      * Send Description
      **********************************************************/
-    public void SendDescription()
+    void SendDescription()
     {
         if (_rtspListener == null)
             return;
@@ -227,7 +269,7 @@ public class StreamListener
      * Send Options
      * the variable control is from parsing the 
      **********************************************************/
-    public void SendSetup(string controlUrl)
+    void SendSetup(string controlUrl)
     {
         {
             if (_rtspListener == null)
@@ -239,11 +281,7 @@ public class StreamListener
             // rtp/avp/tcp - send video over same tcp connection; unicast - no broadcast
             // interleaved01 - video channel 0, control signals channel 1
             setup.Headers["Transport"] = "RTP/AVP/TCP;unicast;interleaved=0-1";
-
             
-            // building a basic auth header. we need to convert user/pass
-            // into array of bytes. we then convert the string of numbers
-            // into Base64 string. this is safe for a HTTP header
             var creds = Convert.ToBase64String(
                 System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
             setup.Headers["Authorization"] = $"Basic {creds}";
@@ -252,5 +290,21 @@ public class StreamListener
         
             Console.WriteLine($"Sent setup: {_url}");
         }
+        
+    }
+    void SendPlay()
+    {
+        if (_rtspListener == null)
+            return;
+        var play = new RtspRequestPlay();
+        play.RtspUri = new Uri(_url!);
+        
+        play.Headers["Session"] = _sessionId!;
+        
+        var creds = Convert.ToBase64String(
+            System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
+        play.Headers["Authorization"] = $"Basic {creds}";
+        _rtspListener.SendMessage(play);
+        Console.WriteLine($"Sent play: {_url}");
     }
 } 

@@ -12,8 +12,6 @@ using OpenCvSharp;
  * WebRTC 
  ************************************************************************/
 
-
-
 // get the ffmpeg data of whatever link you add
 public class StreamVideo
 {
