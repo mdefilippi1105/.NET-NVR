@@ -75,20 +75,20 @@ public class CameraController : Controller
     
     
     // delete the camera
-    public async Task<IActionResult> RemoveCamera(Camera.Camera camera)
+    public async Task<IActionResult> RemoveCamera(Guid id)
     {
         try
         {
+            var camera = await _context.Camera.FindAsync(id);
             _context.Remove(camera);
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Camera removed from database.";
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             TempData["Error"] = "Could not remove camera.";
         }
-        
-        TempData["Success"] = "Camera removed from database.";
         return RedirectToAction(nameof(Index));
     }
 

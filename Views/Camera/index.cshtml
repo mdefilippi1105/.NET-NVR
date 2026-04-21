@@ -23,8 +23,7 @@
             padding-bottom:10px;
             border-bottom:1px solid #1e2550;
             margin:0;">Cameras</p>
-
-
+        
         <a asp-action="Create"
            class="btn btn-sm btn-ffx"
            style="background:#1e2550; 
@@ -57,7 +56,16 @@
 
     </div>
     
-    
+    <!-- Hidden form for camera delete 
+    We cannot POST without this
+    We give the form a name so JS can find it.
+    we send POST request, run action.
+    "id" matches argument for RemoveCamera(int id) -->
+                
+    <form id="confirmForm" method="post" asp-action="RemoveCamera">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="cameraIdInput" name="id" value=""/>
+    </form>
     
     @* TabLe to display all the cameras *@
     <table class= "table table-striped table-dark table-hover">
@@ -115,9 +123,11 @@
                        data-placement="top"
                        title="Edit device">Edit Camera</a>
                 </td>
+                
+                
+
                 <td>
-                    <a asp-action="RemoveCamera"
-                       asp-route-id="@camera.Id"
+                    <a onclick="confirmRemove('@camera.Id')"
                        class="btn btn-sm btn-ffx"
                        style="background:#1e2550; 
                        border:1px solid #330860; 
@@ -152,6 +162,12 @@
         </div>
     </div>
     
+    
+    @*************************************************************************
+                            javascript
+    *************************************************************************@
+    
+    
     @* 
     Javascript for the modal 
     find modal by id, listen for bootstrap shown.bs.modal event
@@ -177,6 +193,39 @@
             }
             document.getElementById('discoverResults').innerHTML = html;
         });
+    </script>
+    
+    @*
+    This fugly Javascript function that removes cams. Takes the cam id and
+    name as paramaters passed in from the button click. open
+    sweetalert. if YES is clicked -> set the hidden input value 
+    to the camera id right before sending. then submit the form.
+    *@
+    <script>
+        function confirmRemove(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Remove Camera?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+                background: '#1a1a2e',
+                color: '#ffffff',
+                confirmButtonColor: '#0d6efd'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    cameraIdInput.value = id;
+                    document.getElementById("confirmForm").submit();
+                    
+                }
+            });
+        }
+        
+        
+        
+        
+        
     </script>
     
    
