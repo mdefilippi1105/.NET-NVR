@@ -1,6 +1,8 @@
+
+using Rtsp;
+using Rtsp.Messages;
+
 namespace VideoRecorder.Services;
-
-
 
 using Rtsp;
 using Rtsp.Messages;
@@ -17,11 +19,12 @@ public class StreamListener
     private bool _attemptedAuth = false;
     private bool _notNull;
     private string? _sessionId;
+    private string? _authHeader;
     
     /************************************************************
      * This is a console version that ties all of these together.
      * At some point, if all testing is passed, I will try
-     * to implement this on my videorecorder engine
+     * to implement this on igi engine
      ************************************************************/
     public void RunStreaming()
     {
@@ -123,6 +126,7 @@ public class StreamListener
      **********************************************************/
     void HandleOk(RtspResponse response)
     {
+        _attemptedAuth = false;
         switch (response.OriginalRequest)
         {
             case RtspRequestOptions:
@@ -181,6 +185,7 @@ public class StreamListener
         if (_attemptedAuth) // this is false by default
         {
             Console.WriteLine("Auth failed - please check username and password");
+            _attemptedAuth = false;
             return;
         }
         _attemptedAuth = true;
@@ -197,7 +202,7 @@ public class StreamListener
         //read the WWW-Authenticate header from the 401 response
         string? wwwAuth = response.Headers["WWW-Authenticate"];
         
-        
+        // this is for DIGEST AUTH
         if (wwwAuth != null && wwwAuth.StartsWith("Digest"))
         {
             //pull out the realm and nonce values
@@ -219,7 +224,7 @@ public class StreamListener
             var creds = Convert.ToBase64String(
                 System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
         
-            retry.Headers["Authorization"] = $"Basic {creds}"; // add the headers
+            retry.Headers["Authorization"] = _authHeader =  $"Basic {creds}"; // add the headers
         }
         _rtspListener!.SendMessage(retry); // takes care of the rest aka convert to bytes and send down the line
     }
@@ -234,6 +239,7 @@ public class StreamListener
     
     
     /**********************************************************
+     * Send OPTIONS
      * creates rtspOptions request object. asks camera what
      * RTSP options are supported.
      **********************************************************/
@@ -251,7 +257,7 @@ public class StreamListener
     
     
     /**********************************************************
-     * Send Description
+     * Send DESCRIPTION
      **********************************************************/
     void SendDescription()
     {
@@ -266,8 +272,7 @@ public class StreamListener
     
     
     /**********************************************************
-     * Send Options
-     * the variable control is from parsing the 
+     * Send SETUP
      **********************************************************/
     void SendSetup(string controlUrl)
     {
@@ -282,15 +287,13 @@ public class StreamListener
             // interleaved01 - video channel 0, control signals channel 1
             setup.Headers["Transport"] = "RTP/AVP/TCP;unicast;interleaved=0-1";
             
-            var creds = Convert.ToBase64String(
-                System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
-            setup.Headers["Authorization"] = $"Basic {creds}";
+            if (_authHeader != null)
+                setup.Headers["Authorization"] = _authHeader;
         
             _rtspListener.SendMessage(setup);
         
             Console.WriteLine($"Sent setup: {_url}");
         }
-        
     }
     void SendPlay()
     {
@@ -300,10 +303,8 @@ public class StreamListener
         play.RtspUri = new Uri(_url!);
         
         play.Headers["Session"] = _sessionId!;
-        
-        var creds = Convert.ToBase64String(
-            System.Text.Encoding.UTF8.GetBytes($"{_username}:{_password}"));
-        play.Headers["Authorization"] = $"Basic {creds}";
+
+        // play.Headers["Authorization"] = _authHeader;
         _rtspListener.SendMessage(play);
         Console.WriteLine($"Sent play: {_url}");
     }

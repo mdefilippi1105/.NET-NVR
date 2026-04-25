@@ -153,6 +153,7 @@ public class CameraController : Controller
         {
             TempData["Error"] = "Camera is not enabled.";
             Console.WriteLine("STREAM ERROR CAM UNENABLED");
+            return RedirectToAction(nameof(Index));
         }
 
         return RedirectToAction(nameof(LiveView), new { id = id });

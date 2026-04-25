@@ -196,7 +196,7 @@
     </script>
     
     @*
-    This fugly Javascript function that removes cams. Takes the cam id and
+    This fugly Javascript function removes cams. Takes the cam id and
     name as paramaters passed in from the button click. open
     sweetalert. if YES is clicked -> set the hidden input value 
     to the camera id right before sending. then submit the form.
@@ -217,7 +217,6 @@
                 if (result.isConfirmed) {
                     cameraIdInput.value = id;
                     document.getElementById("confirmForm").submit();
-                    
                 }
             });
         }

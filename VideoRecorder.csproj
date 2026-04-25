@@ -15,6 +15,7 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="onvif.core" Version="3.0.0" />
+        <PackageReference Include="OnvifDiscovery" Version="2.1.1" />
         <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260222" />
         <PackageReference Include="OpenCvSharp4.runtime.osx_arm64" Version="4.8.1-rc" />
         <PackageReference Include="SharpRTSP" Version="1.11.0" />

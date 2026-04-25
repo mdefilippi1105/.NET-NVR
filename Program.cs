@@ -9,18 +9,18 @@ using VideoRecorder.Services;
 
 //TODO: Utilize IDisposable to clean up streams
 //DONE: lower buffering > over 10sec
-//TODO: when deleting camera, confirm y or n?
+//DONE: when deleting camera, confirm y or n?
 //DONE?: need some kind of loading state, i think liveview is popping up before the stream and crashes
 //TODO: Fix ping - shows success incorrectly
 //TODO:  create 4 way view
 //DONE: fix or delete Stream.ProcessChecker()
 //DONE: create camera guid per stream 
-//TODO: make sure no 2 of the same ffmpeg process running (implement camera guid)
+//DONE: make sure no 2 of the same ffmpeg process running (implement camera guid)
 //TODO: discovered devices: remove duplicates
 //TODO: discovered devices: clear devices button (maybe add these to a list<>())
 //TODO: discovered devices: show mac address
 //TODO: discovered devices: highlight devices that are actually network cams
-//TODO: 
+//TODO: have some sort or reconnect logic if retries exceed an amount of time
 
 
 
