@@ -7,65 +7,65 @@ using VideoRecorder.Database;
 using VideoRecorder.Services;
 
 
-//TODO: Utilize IDisposable to clean up streams
-//DONE: lower buffering > over 10sec
-//DONE: when deleting camera, confirm y or n?
-//DONE?: need some kind of loading state, i think liveview is popping up before the stream and crashes
-//TODO: Fix ping - shows success incorrectly
-//TODO:  create 4 way view
-//DONE: fix or delete Stream.ProcessChecker()
-//DONE: create camera guid per stream 
-//DONE: make sure no 2 of the same ffmpeg process running (implement camera guid)
-//TODO: discovered devices: remove duplicates
-//TODO: discovered devices: clear devices button (maybe add these to a list<>())
-//TODO: discovered devices: show mac address
-//TODO: discovered devices: highlight devices that are actually network cams
-//TODO: have some sort or reconnect logic if retries exceed an amount of time
+    //TODO: Utilize IDisposable to clean up streams
+    //DONE: lower buffering > over 10sec
+    //DONE: when deleting camera, confirm y or n?
+    //DONE?: need some kind of loading state, i think liveview is popping up before the stream and crashes
+    //TODO: Fix ping - shows success incorrectly
+    //TODO:  create 4 way view
+    //DONE: fix or delete Stream.ProcessChecker()
+    //DONE: create camera guid per stream 
+    //DONE: make sure no 2 of the same ffmpeg process running (implement camera guid)
+    //TODO: discovered devices: remove duplicates
+    //TODO: discovered devices: clear devices button (maybe add these to a list<>())
+    //TODO: discovered devices: show mac address
+    //TODO: discovered devices: highlight devices that are actually network cams
+    //TODO: have some sort or reconnect logic if retries exceed an amount of time
 
 
 
 
-// the first thing we want to do is to begin MediaMtx
-StreamVideo stream = new StreamVideo();
-stream.StartMediaMtx();
+    // the first thing we want to do is to begin MediaMtx
+    StreamVideo stream = new StreamVideo();
+    stream.StartMediaMtx();
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews(); // tell the app we want controllers and MVC
+    builder.Services.AddControllersWithViews(); // tell the app we want controllers and MVC
 
-//register the db so controllers can use it
-builder.Services.AddDbContext<VideoRecorderContext>(options =>
-   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")) ); 
-
-
+    //register the db so controllers can use it
+    builder.Services.AddDbContext<VideoRecorderContext>(options =>
+       options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")) ); 
 
 
 
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) // set up cookie auth
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.ExpireTimeSpan = TimeSpan.FromDays(7);
-        options.SlidingExpiration = true;
-
-    });
-
-var app = builder.Build(); //build it
 
 
-app.UseStaticFiles(); //allow for css, images, js
+    builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) // set up cookie auth
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/Account/Login";
+            options.LogoutPath = "/Account/Logout";
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            options.SlidingExpiration = true;
+
+        });
+
+    var app = builder.Build(); //build it
 
 
-app.UseRouting(); //turn on routing so URLS work
+    app.UseStaticFiles(); //allow for css, images, js
 
-// default URL pattern: website.com/Camera/Index
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Camera}/{action=Index}/{id?}");
 
-app.UseAuthentication();
-app.UseAuthorization();
+    app.UseRouting(); //turn on routing so URLS work
 
-app.Run();    //run
+    // default URL pattern: website.com/Camera/Index
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Camera}/{action=Index}/{id?}");
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.Run();    //run

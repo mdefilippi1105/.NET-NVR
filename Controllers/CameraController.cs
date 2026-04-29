@@ -177,9 +177,10 @@ public class CameraController : Controller
     {
         try
         {
-            var discovery = new OnvifDiscovery();
-            var devices = await discovery.DiscoverAsync();
-            return Json(devices);
+            var discovery = new AltOnvifDiscovery();
+            await discovery.DiscoverAsync();
+            
+            return Json(discovery.OnvifUriList);
         }
         catch (Exception e)
         {

@@ -5,7 +5,7 @@ using Onvif.Core.Discovery.Models;
 
 namespace VideoRecorder.Services;
 
-public class OnvifDiscovery
+public class OldOnvifDiscovery
 {
     public async Task< IEnumerable <DiscoveryDevice>> DiscoverAsync()
     {

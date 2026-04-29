@@ -40,7 +40,6 @@
         </a>
         
         <a
-            onclick="discoverDevices()"
             class="btn btn-sm btn-ffx"
             style="background:#1e2550; 
                    border:1px solid #330860; 
@@ -48,10 +47,24 @@
                    display:flex; 
                    align-items:center; 
                    gap:8px;"
-                   data-bs-toggle="modal"
-                   data-bs-target="#discoverModal">
+            data-bs-toggle="modal"
+            data-bs-target="#discoverModal">
             <i class="bi bi-broadcast fs-3"></i>
             Discover Cameras
+        </a>
+        
+        <a
+            class="btn btn-sm btn-ffx"
+            style="background:#1e2550; 
+                   border:1px solid #330860; 
+                   color:#fafafa;
+                   display:flex; 
+                   align-items:center; 
+                   gap:8px;"
+            data-bs-toggle="modal"
+            data-bs-target="#discoverModalOnvif">
+            <i class="bi bi-camera-reels"></i>
+            Discover ONVIF
         </a>
 
     </div>
@@ -153,7 +166,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="discoverResults">
-                    Scanning...
+                    Scanning...please wait.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -161,6 +174,26 @@
             </div>
         </div>
     </div>
+    
+    
+    @* ONVIF devices discovery Modal *@
+    <div class="modal fade" id="discoverModalOnvif" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Discovered Cameras</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="onvifResults">
+                    Scanning...please wait.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     
     
     @*************************************************************************
@@ -192,6 +225,28 @@
                 html += '<p>' + devices[i] + '</p>';
             }
             document.getElementById('discoverResults').innerHTML = html;
+        });
+    </script>
+    
+    
+    
+    <script>
+        document.getElementById('discoverModalOnvif').addEventListener('shown.bs.modal',
+        
+        async function () {
+            
+            const response = await fetch('/Camera/Discover/'); 
+            const devices = await response.json();
+            let html = '';
+            
+            if (devices.length === 0) {
+                html = '<p> No devices found.</p>';
+            }
+            
+            for (let i = 0; i < devices.length; i++) {
+                html += '<p>' + devices[i] + '</p>';
+            }
+            document.getElementById('onvifResults').innerHTML = html;
         });
     </script>
     

@@ -79,7 +79,7 @@ public class UdpDiscoveryTools {
     public static List<string> ReceiveResponse()
     {
         var results = new List<string>();
-        socket.Client.ReceiveTimeout = 10000; // this is 30 seconds, it may have to be adjusted
+        socket.Client.ReceiveTimeout = 10000; // this is 10 seconds, it may have to be adjusted
         try
         {
             while (true)

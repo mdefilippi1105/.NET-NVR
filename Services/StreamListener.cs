@@ -26,32 +26,15 @@ public class StreamListener
      * At some point, if all testing is passed, I will try
      * to implement this on igi engine
      ************************************************************/
-    public void RunStreaming()
+    public void RunStreaming(string target, string username, string password)
     {
-        Console.WriteLine("Please enter an ip address: ");
-        string? host = Console.ReadLine();
-        Console.WriteLine("Please enter an username: ");
-        var username = Console.ReadLine();
-        Console.WriteLine("Please enter a password: ");
-        var password = Console.ReadLine();
-        Console.WriteLine("Please enter camera manufacturer: ");
-        var cameraManufacturer = Console.ReadLine();
-        if (cameraManufacturer == "axis" || cameraManufacturer == "AXIS" || cameraManufacturer == "Axis")
-        {
-            var port = 554;
-            var path = "/axis-media/media.amp";
-            var s = new StreamListener();
-            s.ClientConnect(host!, port, path , username!, password!);
-            s.StartListening();
-            s.SendOptions();
-            s.SendDescription();
-            Console.ReadLine();
-        }
-        else
-        {
-            Console.WriteLine("This camera is unsupported.");
-            Console.ReadLine();
-        }
+        var s = new StreamListener();
+        s.ClientConnect(target, username, password);
+        s.StartListening();
+        s.SendOptions();
+        s.SendDescription();
+        Console.ReadLine();
+
         Console.WriteLine("Press any key to exit.");
         Console.ReadLine();
     }
@@ -60,13 +43,29 @@ public class StreamListener
      * create a new socket that we connect to
      * this would be considered the rtsp server
      * in this case, it would be an ip cam
+     * IMPORTANT: Some Rtsp url strings don't contain a port
+     * 
      **********************************************************/
-    void ClientConnect(string host, int port, string path, string username, string password)
+    void ClientConnect(string url, string username, string password)
     {
         _username = username;
         _password = password;
-        _url = $"rtsp://{host}:{port}/{path}";
-        _tcpSocket = new RtspTcpTransport(new Uri(_url));
+        
+        var uri = new Uri(url);
+        int port;
+        if (uri.Port == -1)
+            port = 554;
+        else
+            port = uri.Port;
+        
+        
+        var builder = new UriBuilder(uri);
+        builder.Port = port;
+
+        var uriWithPort = builder.Uri;
+        _url = uriWithPort.ToString();
+        
+        _tcpSocket = new RtspTcpTransport(uriWithPort);
 
        if (!_tcpSocket.Connected)
        {
