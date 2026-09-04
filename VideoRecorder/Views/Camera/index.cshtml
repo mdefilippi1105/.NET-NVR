@@ -291,15 +291,19 @@
                         asp-route-id="@camera.Id"
                         method="post"
                         class="d-inline">
-                    <button
-                        class="btn btn-sm btn-ffx @(camera.IsRecording && camera.IsOnline ? "pulse-red-recording" : "")"
-                        style="background:#1e2550;
-                        border:1px solid #330860;
-                        color:#fafafa;
-                        width: 75px;"
-                        button type="submit">
+                        <button
+                            id="record-@camera.Id"
+                            data-camera-id="@camera.Id"
+                            class="btn btn-sm btn-ffx record-btn @(camera.IsRecording && camera.IsOnline ? "pulse-red-recording" : "")"
+                            style="background:#1e2550;
+                            border:1px solid #330860;
+                            color:#fafafa;
+                            width: 75px;"
+                            type="submit">
                         @* we  put  the @ sign here to run c# commands within this line*@
-                        <img src="~/Images/@(camera.IsRecording ? "record-on.png" : "record-off.png")"
+                        <img
+                            id="record-img-@camera.Id"
+                            src="~/Images/@(camera.IsRecording ? "record-on.png" : "record-off.png")"
                              alt="" width="30" height="30">
                     </button>
                     </form>
@@ -712,26 +716,95 @@
             dot.classList.add(data.ready ? 'online' : 'offline');
 
             const btn = document.getElementById('record-' + id);
-            btn.classList.toggle('pulse-red-recording', data.ready && data.recording);   
-            
+            btn.classList.toggle('pulse-red-recording', data.ready && data.recording);
         })
     </script>
     
-    @*This checks each camera for the RECORDING status.*@
+    
     <script>
-        document.querySelectorAll('.record-dot').forEach(async dot => {
-            const id = dot.id.replace('status-', '');
-            const response = await fetch('/Camera/StreamStatus/' + id);
-            const data = await response.json();
-            
-            if (data.ready) {
-                dot.classList.add('online'); // if ready the span class becomes dot.online
-            } else {
-                dot.classList.add('offline'); // or dot.offline. diff CSS colors for each
-            }    
-            
-        })
+        async function refreshDots() {
+                try {
+                    const response = await fetch('/Camera/StreamStatuses/');
+                    if (!response.ok) return;
+                    const statuses = await response.json();
+                    
+                    for (const s of statuses) {
+                        const dot = document.getElementById('status-' + s.id);
+
+                        if (dot) {
+                            dot.classList.remove('online', 'offline');
+                            dot.classList.add(s.ready ? 'online' : 'offline');
+                        }
+                        
+                        const btn = document.getElementById('record-' + s.id);
+
+                        if (btn) {    
+                            const shouldPulse = s.ready && s.recording;
+                            const isPulsing = btn.classList.contains('pulse-red-recording');
+
+                            if (shouldPulse !== isPulsing)                          // only act when state changed
+                                btn.classList.toggle('pulse-red-recording', shouldPulse);
+                        }
+                        
+                        const img = document.getElementById('record-img-' + s.id);
+                        if (img) 
+                            img.src = s.armed ? '/Images/record-on.png' : '/Images/record-off.png';
+                    }  
+                    
+                } catch {
+                    console.error(e)
+                }
+        }
+        refreshDots();
+        setInterval(refreshDots, 2000);
     </script>
+    
+    
+    <script>
+        document.querySelectorAll('.record-btn').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                e.preventDefault(); // no form submit, no page reload
+                btn.classList.add('pending'); // spinner/dimmed state
+                btndisabled = true;
+                
+                const started = Date.now();
+                try {
+                    await fetch ('/Recording/ToggleRecording/' + btn.dataset.cameraId, {method: 'POST'});
+                } finally {
+                    
+                    // I really hate to do this, but this is an artificial timer
+                    // the "process" time is like 50ms and just looks like a bug.
+                    
+                    const elapsed = Date.now() - started;
+                    const remaining = Math.max(0, 400 - elapsed);
+                    setTimeout(() => {
+                        btn.classList.remove('pending');
+                        btn.disabled = false;
+                    }, remaining);
+                }
+            })
+        })
+        
+        
+        
+        
+    </script>
+    
+    @* OLD STREAM STATUS METHOD $1$This checks each camera for the RECORDING status.#1# *@
+    @* <script> *@
+    @*     document.querySelectorAll('.record-dot').forEach(async dot => { *@
+    @*         const id = dot.id.replace('status-', ''); *@
+    @*         const response = await fetch('/Camera/StreamStatus/' + id); *@
+    @*         const data = await response.json(); *@
+    @*          *@
+    @*         if (data.ready) { *@
+    @*             dot.classList.add('online'); // if ready the span class becomes dot.online *@
+    @*         } else { *@
+    @*             dot.classList.add('offline'); // or dot.offline. diff CSS colors for each *@
+    @*         }     *@
+    @*          *@
+    @*     }) *@
+    @* </script> *@
     
     
     

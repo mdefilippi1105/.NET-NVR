@@ -275,6 +275,15 @@ IMPORTANT: ICONS ARE 9090b8 / 60px
             0%   { box-shadow: 0 0 0 0 rgba(255, 43, 66, 0.5); }
             100% { box-shadow: 0 0 0 6px rgba(255, 43, 66, 0); }
         }
+
+        .record-btn.pending {
+            animation: pending-fade 0.8s ease-in-out infinite;
+            cursor: wait;              /* cursor changes on hover */
+        }
+        @@keyframes pending-fade {
+            0%, 100% { opacity: 0.4; }
+            50%      { opacity: 0.8; }
+        }
         .status-wrap {
             flex: 1;
             padding: 24px 28px;

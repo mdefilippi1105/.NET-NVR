@@ -23,15 +23,17 @@ using VideoRecorder.Services;
     //DONE: Bug when adding rtsp camera
     //DONE ping on dashboard does not work for rtsp added devices
     //DONE: check out bugs with onvif discovery
+    //DONE: Fix ping - shows success incorrectly
+    //DONE: fix response issue for recording button
     //TODO: discovered devices: clear devices button (maybe add these to a list<>())
     //TODO: discovered devices: show mac address
     //TODO: discovered devices: highlight devices that are actually network cams
-    //TODO: Fix ping - shows success incorrectly
     //TODO: Convert comments to <param> style
     //TODO: When discovering onvif cams, save button saves all instead of one at a time
     //TODO: program crashes when saving camera with an empty field
     //TODO: create a default admin username built - in
     //TODO: find way to obscure username/pass in rtsp url
+    //TODO: find way to obscure username/pass in ffmpeg stderr
     //TODO: add devices through csv
     
 

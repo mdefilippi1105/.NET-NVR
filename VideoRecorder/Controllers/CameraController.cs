@@ -338,13 +338,20 @@ public class CameraController : Controller
     /*****************************************************************
      * Call IsStreamReady and return bool "ready"
      *****************************************************************/
-    public async Task<IActionResult> StreamStatus(Guid id)
+    public async Task<IActionResult> StreamStatuses()
     {
-        var cam = await _context.Camera.FindAsync(id);
-        if (cam == null)
-            return NotFound();
-        
-        return Json(new { ready  = cam.IsOnline, recording = cam.IsRecording });
+        var statuses = await _context.Camera
+            .AsNoTracking()
+            .Select(c => new
+            {
+                id = c.Id, 
+                ready = c.IsOnline,
+                armed = c.UserToggledRecording,
+                recording = c.IsRecording
+            })
+            .ToListAsync();
+
+        return Json(statuses);
     }
         
     /*****************************************************************
