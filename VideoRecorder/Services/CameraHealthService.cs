@@ -36,7 +36,6 @@ public class CameraHealthService : BackgroundService
     }
     
     
-    
     // this is our logic to delete the recordings
     // camera retention time is set by
     // the adding camera / edit camera pages
@@ -81,7 +80,7 @@ public class CameraHealthService : BackgroundService
             
             // set to using to implement IDisposable
             using var ping = new Ping();
-            var reply = ping.Send(host, 1000);
+            var reply = ping.Send(host, 500);
             return reply.Status == IPStatus.Success;
         }
         catch

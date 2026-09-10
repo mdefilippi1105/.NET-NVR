@@ -22,21 +22,18 @@ public class AccountController : Controller
         _context = context;
         _logger = logger;
         _hasher = hasher;
-
     }
-    
-    
     
     public IActionResult Login()
     {
         return View();
     }
+    
 /*******************************************************************************************
  * Claims are basically properties of a user "object"
  * ClaimsIdentity is a collection of key:pair values for a user + wrap it in cookie auth
  * ClaimsPrincipal represents the user as an object
  *******************************************************************************************/
-
     [HttpPost]
     public async Task<IActionResult> Login(string username, string password)
     {

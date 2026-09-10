@@ -333,11 +333,7 @@ public class CameraController : Controller
     /***********************************************************************
      * when you log in ping all cams
      ************************************************************************/
- 
-        
-    /*****************************************************************
-     * Call IsStreamReady and return bool "ready"
-     *****************************************************************/
+
     public async Task<IActionResult> StreamStatuses()
     {
         var statuses = await _context.Camera

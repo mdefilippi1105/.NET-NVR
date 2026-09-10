@@ -57,7 +57,8 @@ using VideoRecorder.Services;
         {
             options.LoginPath = "/Account/Login";
             options.LogoutPath = "/Account/Logout";
-            options.ExpireTimeSpan = TimeSpan.FromDays(7);
+            options.AccessDeniedPath = "/Account/Login";
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(7);
             options.SlidingExpiration = true;
 
         });

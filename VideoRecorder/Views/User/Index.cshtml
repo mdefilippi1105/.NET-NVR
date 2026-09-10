@@ -70,7 +70,7 @@
                    display:flex; 
                    align-items:center; 
                    gap:8px;">
-            <img src="~/Images/addcamera.png" alt="" width="45" height="45">
+            <img src="~/Images/cam.png" alt="" width="45" height="45">
             Return to Cams
         </a>
         
@@ -105,13 +105,14 @@
    
         @* this is the sort form *@
 
-        <table class="table table-striped table-dark table-hover">
-            <thead class="table-dark">
+        <table class="table table-sm table-striped table-dark table-hover align-middle" style="align-self:start; width:auto; margin-top:69px">
+            <thead class="table-dark table-sm" style="align-self:start; ">
             <tr>
+                <th style="width:150px;"></th>
                 <th style="width:150px;">Name</th>
                 <th style="width:150px;">Description</th>
                 <th style="width:150px;">Enabled</th>
-  
+
             </tr>
             </thead>
 
@@ -120,6 +121,17 @@
             @foreach (var user in Model)
             {
                 <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(user.PhotoPath))
+                        {
+                            <img src="@user.PhotoPath" width="40" height="40"
+                                 class="rounded-circle" style="object-fit:cover;" alt="@user.Username"/>
+                        }
+                        else
+                        {
+                            <span class="text-scondary">-</span>
+                        }
+                    </td>
                     <input type="hidden" name="Id" value="@user.Id"/>
                     <td>@user.Username</td>
                     <td>@user.Role</td>

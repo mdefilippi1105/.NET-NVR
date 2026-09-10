@@ -32,12 +32,19 @@ public class RecordingService
     public void Start(Camera camera, string cameraUrl)
     {
         
+        // check for stale processes before starting a fresh one
+        if (_recordings.TryGetValue(camera.Id, out var existingProcess))
+        {
+            if (!existingProcess.HasExited)
+                return;
+            
+            _recordings.TryRemove(camera.Id, out _);
+            existingProcess.Dispose();
+        }
+        
         if (String.IsNullOrWhiteSpace(camera.Server?.DrivePath))
             throw new InvalidOperationException($"Camera {camera.Id} has no server drive path.");
-        
-        
-        
-      
+
         
         // $@ keeps the slashes verbatim and string interpolation
         var recordingDirectory = Path.Combine(camera.Server.DrivePath, camera.Id.ToString());
@@ -60,13 +67,7 @@ public class RecordingService
         recordProcess.StartInfo.UseShellExecute = false;
         // suppresses a blank cmd window from popping up - for Windows OS only
         recordProcess.StartInfo.CreateNoWindow = true;
-
-        if (!_recordings.TryAdd(camera.Id, recordProcess))
-        {
-            recordProcess.Dispose();
-            return;
-        }
-
+        
         try
         {
             recordProcess.Start();
@@ -76,6 +77,84 @@ public class RecordingService
             _recordings.TryRemove(camera.Id, out _);
             recordProcess.Dispose();
             throw;
+        }
+
+        
+        if (!_recordings.TryAdd(camera.Id, recordProcess))
+        {
+            recordProcess.Dispose();
+            return;
+        }
+
+    }
+
+    // we pull the reference out of the dictionary, to kill
+    // the process and then dispose of it cleanly
+    // if cameraId comes back false, out var process is null
+    public void Stop(Guid cameraId)
+    {
+        if (!_recordings.TryRemove(cameraId, out var process))
+            return;
+        try
+        {
+            if (!process.HasExited)
+            {
+                //simulate hitting q - shuts down the process clean
+                process.StandardInput.Write("q");
+                //flush out the buffer
+                process.StandardInput.Flush();
+
+                if (!process.WaitForExit(1000))
+                    process.Kill(entireProcessTree: true);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        finally
+        {
+            process.Dispose();
+        }
+        
+    }
+    
+    // allow recording if the user enabled recording button, the cam is online,
+    // and the camera is enabled.
+    public void RecordingAuthorize(Camera camera)
+    {
+        // look up the camera id
+        // if no entry, never started, false
+        // if entry dead - ffmpeg quit, false
+        // if entry alive - ffmpeg running, true
+        _recordings.TryGetValue(camera.Id, out var process);
+        
+        var processIsAlive = process is not null && !process.HasExited;
+        
+        camera.IsRecording = processIsAlive;
+        
+        var recordingAllowed = camera.UserToggledRecording && camera.IsOnline && camera.IsEnabled;
+        
+        // if no server found - set IsRecording to false
+        if (camera.Server is null || string.IsNullOrWhiteSpace(camera.Server.DrivePath))
+        {
+            camera.IsRecording = false;
+            return;
+        }
+        
+        //cam online, enabled and toggle button clicked, but NOT currently recording
+        if (recordingAllowed && !camera.IsRecording)
+        {
+            var url = $"rtsp://{camera!.Username}:{camera.Password}@{camera.Host}{camera.Path}";
+            Start(camera, url);
+            
+        }
+        
+        // if any 3 of the "allowed" parameters are not satisfied
+        else if (!recordingAllowed && camera.IsRecording)
+        {
+            Stop(camera.Id); // "shut it down" -jon taffer
+            camera.IsRecording = false;
         }
     }
     
@@ -117,78 +196,6 @@ public class RecordingService
     //     // lastly we add the id and the process to the dictionary
     //     _recordings.TryAdd(cameraId, recordProcess);
     // }
-    
-    
-    // we pull the reference out of the dictionary, to kill
-    // the process and then dispose of it cleanly
-    // if cameraId comes back false, out var process is null
-    public void Stop(Guid cameraId)
-    {
-        if (!_recordings.TryRemove(cameraId, out var process))
-            return;
-        try
-        {
-            if (!process.HasExited)
-            {
-                //simulate hitting q - shuts down the process clean
-                process.StandardInput.Write("q");
-                //flush out the buffer
-                process.StandardInput.Flush();
-
-                if (!process.WaitForExit(1000))
-                    process.Kill(entireProcessTree: true);
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-        finally
-        {
-            process.Dispose();
-        }
-        
-    }
-    
-    // allow recording if the user enabled recording button, the cam is online,
-    // and the camera is enabled.
-    public void RecordingAuthorize(Camera camera)
-    {
-        // look up the camera id
-        // if no entry, never started, false
-        _recordings.TryGetValue(camera.Id, out var process);
-        
-        // if entry dead - ffmpeg quit, false
-        var processIsAlive = process is not null && !process.HasExited;
-        
-        // if entry alive - ffmpeg running, true
-        camera.IsRecording = processIsAlive;
-        
-        
-        var recordingAllowed = camera.UserToggledRecording && camera.IsOnline && camera.IsEnabled;
-        
-        // if no server found - set IsRecording to false
-        if (camera.Server is null || string.IsNullOrWhiteSpace(camera.Server.DrivePath))
-        {
-            camera.IsRecording = false;
-            return;
-        }
-        
-        //cam online, enabled and toggle button clicked, but NOT currently recording
-        if (recordingAllowed && !camera.IsRecording)
-        {
-            var url = $"rtsp://{camera!.Username}:{camera.Password}@{camera.Host}{camera.Path}";
-            Start(camera, url);
-            
-        }
-        
-        // if any 3 of the "allowed" parameters are not satisfied
-        else if (!recordingAllowed && camera.IsRecording)
-        {
-            Stop(camera.Id); // "shut it down" -jon taffer
-            camera.IsRecording = false;
-        }
-    }
     
     
     
